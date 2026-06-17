@@ -76,8 +76,8 @@ The architectural design diagram is available at [public/arch.svg](public/arch.s
 2. Create a new Web Service on [Render](https://render.com)
 3. Connect your GitHub repository
 4. Configure the service:
-   - **Build Command:** `npm run build` (in backend directory)
-   - **Start Command:** `node dist/index.js`
+   - **Build Command:** `npm install && npm run build` (in backend directory)
+   - **Start Command:** `npm start`
    - **Root Directory:** `backend`
 5. Add environment variables:
    - `DATABASE_URL` - PostgreSQL connection string (use Render Postgres as recommended)
@@ -102,9 +102,9 @@ The architectural design diagram is available at [public/arch.svg](public/arch.s
 
 Render puts free-tier services to sleep after 15 minutes of inactivity. To keep your backend awake:
 
-1. Set up a cron job (using [EasyCron](https://www.easycron.com), [cron-job.org](https://cron-job.org), or similar) to hit the health endpoint:
+1. Set up a cron job (using[cron-job.org](https://cron-job.org), or similar) to hit the health endpoint:
    ```
-   GET https://your-app.onrender.com/health
+   GET https://project-and-task-manager-fastigo-ai.onrender.com/health
    ```
    Schedule it to run every 5 minutes.
 
