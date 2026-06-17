@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: team_task_manager
+      POSTGRES_USER: team_task_manager
+      POSTGRES_PASSWORD: team_task_manager
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U team_task_manager -d team_task_manager"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 9000
+      DATABASE_URL: postgres://team_task_manager:team_task_manager@db:5432/team_task_manager
+      DB_SSL: "false"
+      CORS_ORIGIN: http://localhost:4173
+    ports:
+      - "9000:9000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:9000
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "4173:80"
+
+volumes:
+  db_data:
