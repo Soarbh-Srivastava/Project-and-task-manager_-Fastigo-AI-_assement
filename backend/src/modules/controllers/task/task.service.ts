@@ -3,6 +3,7 @@ import { Task, TaskPriority, TaskStatus } from "../../../entities/Task";
 import { Project } from "../../../entities/Project";
 import { User } from "../../../entities/User";
 import { Roles } from "../../../types/roles";
+import { generateSummary } from "../../../utils/ai";
 
 export class TaskService {
   private static taskRepo = AppDataSource.getRepository(Task);
@@ -43,6 +44,46 @@ export class TaskService {
     newTask.assignee = assignee;
 
     return this.taskRepo.save(newTask);
+  }
+
+  static async summarizeTask(taskId: string, actor: { id: string; role: string }) {
+    const task = await this.taskRepo.findOne({
+      where: { id: taskId },
+      relations: [
+        "project",
+        "project.team",
+        "project.team.owner",
+        "project.team.members",
+        "creator",
+        "assignee",
+      ],
+    });
+
+    if (!task) {
+      throw new Error("Task not found");
+    }
+
+    this.assertProjectAccess(task.project, actor);
+
+    // Build a prompt for summarization
+    const parts = [
+      `Title: ${task.title}`,
+      task.description ? `Description: ${task.description}` : undefined,
+      task.assignee ? `Assignee: ${task.assignee.id}` : undefined,
+      task.due_date ? `Due: ${task.due_date.toISOString()}` : undefined,
+      `Status: ${task.status}`,
+      `Priority: ${task.priority}`,
+    ].filter(Boolean) as string[];
+
+    const prompt = `Summarize the following task in 2-3 concise bullet points suitable for a sprint planning note.\n\n${parts.join("\n")}`;
+
+    const ai = await generateSummary(prompt);
+
+    return {
+      taskId: task.id,
+      summary: ai.text,
+      aiUsed: ai.success,
+    };
   }
 
   static async getTasksByProject(

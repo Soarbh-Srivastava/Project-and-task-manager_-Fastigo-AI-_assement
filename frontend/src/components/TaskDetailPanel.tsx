@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import type { Task, TaskStatus } from "../types";
 import { TASK_STATUS_LABELS, TASK_STATUS_ORDER } from "../utils/tasks";
 import StatusBadge from "./StatusBadge";
 import { formatDateIso } from "../utils/date";
+import api from "../api/axios";
+import Modal from "./Modal";
 
 type Props = {
   task: Task | null;
@@ -10,6 +12,9 @@ type Props = {
 };
 
 export default function TaskDetailPanel({ task, onMoveTask }: Props) {
+  const [summarizing, setSummarizing] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   if (!task) {
     return (
       <div className="card detail-panel">Select a task to view details.</div>
@@ -21,7 +26,37 @@ export default function TaskDetailPanel({ task, onMoveTask }: Props) {
       <div className="detail-panel__header">
         <h3>{task.title}</h3>
         <StatusBadge status={task.status} />
+        <button
+          className="button button--secondary"
+          type="button"
+          disabled={summarizing || !task.description}
+          onClick={async () => {
+            try {
+              setSummarizing(true);
+              const res = await api.post(`/tasks/${task.id}/summarize`);
+              const s = res?.data?.summary || "No summary available";
+              setSummary(s);
+              setModalOpen(true);
+            } catch (e) {
+              setSummary("Could not generate summary");
+              setModalOpen(true);
+            } finally {
+              setSummarizing(false);
+            }
+          }}
+        >
+          {summarizing ? (
+            <>
+              <span className="spinner" />Summarizing...
+            </>
+          ) : (
+            "Summarize"
+          )}
+        </button>
       </div>
+      <Modal open={modalOpen} title="Task Summary" onClose={() => setModalOpen(false)}>
+        <pre style={{ whiteSpace: "pre-wrap", margin: 0 }}>{summary}</pre>
+      </Modal>
 
       {task.description ? (
         <p>{task.description}</p>

@@ -55,4 +55,21 @@ export class TaskController {
       res.status(400).json({ error: err.message });
     }
   }
+
+  static async summarize(req: Request, res: Response) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const result = await TaskService.summarizeTask(
+        String(req.params.taskId),
+        req.user,
+      );
+
+      res.json(result);
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  }
 }

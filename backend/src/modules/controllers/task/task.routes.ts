@@ -8,5 +8,6 @@ router.get("/:projectId", authenticate, TaskController.getProjectTasks);
 router.patch("/:taskId/status", authenticate, TaskController.updateStatus);
 
 router.post("/", authenticate, TaskController.create);
+router.post("/:taskId/summarize", authenticate, TaskController.summarize);
 
 export default router;

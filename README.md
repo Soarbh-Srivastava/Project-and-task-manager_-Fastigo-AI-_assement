@@ -68,6 +68,18 @@ A Postman collection is included at [backend/api/team-task-manager.postman_colle
 
 The architectural design diagram is available at [public/arch.svg](public/arch.svg).
 
+## Documentation
+
+Project documentation is available in the [docs](docs) folder:
+
+- [docs/README.md](docs/README.md)
+- [docs/API.md](docs/API.md)
+- [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md)
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
+- [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)
+
 ## Deployment
 
 ### Backend on Render
